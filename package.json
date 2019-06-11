@@ -1,6 +1,6 @@
 {
   "name": "react-native-sqlite-cli",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "CLI interface for create SQLite-enabled React Native apps",
   "main": "index.js",
   "bin": {
