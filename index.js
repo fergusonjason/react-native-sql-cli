@@ -11,15 +11,14 @@ const program = new commander.Command();
 program.version(package.version, '-v, --version');
 
 program
-    .command('create <projectname>')
-    // TODO: change this to --debug
-    .option('-C, --show-commander-options')
+    .command('create [projectname]')
     .option('-G, --no-git-config')
     .option('-S, --no-sqlite-config')
     .option('-L, --no-lint')
     .option('-B, --no-babel')
     .option('-N, --no-navigation')
     .option('-R, --no-redux')
+    .option('--debug','show debug information and exit')
     .action(function(projectName, options) {
         const create = require('./lib/create');
         create(projectName, options);
