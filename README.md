@@ -73,11 +73,12 @@ Options:
 # Roadmap
 
 0.4.0 - (Current) Create, Nuke, and Archive execute. Create needs to be tested.
-0.4.1 - Select and download license
-0.5.0 - Add a database init command to create a basic SQLite database
+0.5.0 - Bugfixes and file templates
+0.6.0 - Add a database init command to create a basic SQLite database
 
 Planned but not scheduled: 
 
+- select and download license
 - Use file templates instead of trying to modify certain files in-place
 - Support other repositories than GitHub
 - Code cleanup (javascript string templates, etc)
