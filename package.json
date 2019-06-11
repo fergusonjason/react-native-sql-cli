@@ -1,0 +1,28 @@
+{
+  "name": "react-native-sqlite-cli",
+  "version": "0.1.0",
+  "description": "CLI interface for create SQLite-enabled React Native apps",
+  "main": "index.js",
+  "bin": {
+    "rnsc2": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native",
+    "sqlite"
+  ],
+  "author": "Jason Ferguson",
+  "license": "MIT",
+  "dependencies": {
+    "archiver": "^3.0.0",
+    "commander": "^2.20.0",
+    "github-api": "^3.2.0",
+    "inquirer": "^6.3.1",
+    "insert-line": "^1.1.0",
+    "react-native": "^0.59.9",
+    "react-native-cli": "^2.0.1",
+    "shelljs": "^0.8.3"
+  }
+}
