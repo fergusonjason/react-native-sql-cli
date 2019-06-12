@@ -25,9 +25,9 @@ program
     });
 
 program
-    .command('nuke <projectname>')
+    .command('nuke [projectname]')
     // TODO: change this to --debug
-    .option('-C, --show-commander-options')
+    .option('--debug', 'show debug information and exit')
     .option('-G, --no-github-nuke')
     .option('-F, --no-file-nuke')
     .action(function(projectname, options) {
