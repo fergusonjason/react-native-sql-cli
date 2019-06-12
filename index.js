@@ -26,7 +26,6 @@ program
 
 program
     .command('nuke [projectname]')
-    // TODO: change this to --debug
     .option('--debug', 'show debug information and exit')
     .option('-G, --no-github-nuke')
     .option('-F, --no-file-nuke')
