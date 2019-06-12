@@ -36,8 +36,8 @@ program
     });
 
 program
-    .command('archive <projectname>')
-    .option('-C, --show-commander-options')
+    .command('archive [projectname]')
+    .option('--debug', 'show debug information and exit')
     .action(function(projectname, options) {
         const archive = require('./lib/archive');
         archive(projectname, options);
