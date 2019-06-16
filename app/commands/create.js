@@ -4,70 +4,71 @@ const insertLine = require("insert-line");
 const util = require('util');
 const yarnUtils = require('../modules/yarn');
 
-const main = async function(projectName, commanderOptions) {
+const main = async function(globalOptions) {
+//const main = async function(projectName, commanderOptions) {
 
-    if (commanderOptions.showCommanderOptions || commanderOptions.debug) {
-        shelljs.echo("commander options: " + util.inspect(commanderOptions));
-        return;
-    }
+    // if (commanderOptions.showCommanderOptions || commanderOptions.debug) {
+    //     shelljs.echo("commander options: " + util.inspect(commanderOptions));
+    //     return;
+    // }
 
-    if (!projectName) {
-        shelljs.echo('You must provide the name of the project to create');
-        return;
-    }
+    // if (!projectName) {
+    //     shelljs.echo('You must provide the name of the project to create');
+    //     return;
+    // }
     var config = {};
     config.action = 'create';
-    config.projectName = projectName;
+    config.projectName = globalOptions.projectName;
     
-    var basePath = shelljs.pwd() + "/" + projectName;
+    var basePath = shelljs.pwd() + "/" + globalOptions.projectName;
 
     if (shelljs.test("-e",basePath)) {
         shelljs.echo("Directory is not empty! Exiting!");
         return;
     }
     try {
-        precheck(commanderOptions);
+        precheck(globalOptions);
     } catch (err) {
         shelljs.echo("Precheck failed: " + err.message);
     }
 
-    const questions = buildQuestions(projectName, commanderOptions);
+    const questions = buildQuestions(globalOptions);
     const answers = await inquirer.prompt(questions);
 
-    shelljs.echo("Creating project in " + basePath);
+    shelljs.echo("Creating project in " + globalOptions.projectDirectory);
 
-    createReactNativeProject(projectName);
+    createReactNativeProject(globalOptions.projectName);
 
     installReactNativeSqliteStorage();
 
-    if (commanderOptions.lint) {
+    if (globalOptions.commandOptions.lint) {
         if (answers.configureEsLint) {
             const eslint = require('../modules/eslint');
             await eslint(answers);
         }
     }
 
-    if (commanderOptions.babel) {
+    if (globalOptions.commandOptions.babel) {
         if (answers.configureBabel) {
             const babel = require('../modules/babel');
             babel();
         }
     }
 
-    if (commanderOptions.license) {
+    if (globalOptions.commandOptions.license) {
         if (answers.configureLicense) {
             const license = require('../modules/licensing');
             await license();
         }
     }
 
-    if (commanderOptions.navigation) {
+    if (globalOptions.commandOptions.navigation) {
         if (answers.reactNavigation) {
             installReactNavigation();
         }
     }
 
-    if (commanderOptions.redux) {
+    if (globalOptions.commandOptions.redux) {
         if (answers.redux) {
             installRedux();
         }
@@ -80,11 +81,11 @@ const main = async function(projectName, commanderOptions) {
     // TODO: allow non-MIT licenses
     //setLicense();
     modifyRnssForIos();
-    modifyRnssForAndroid(basePath, projectName);
+    modifyRnssForAndroid(globalOptions.projectPath, globalOptions.projectName);
 
     createAppDir();
 
-    if (commanderOptions.gitConfig) {
+    if (globalOptions.configOptions.gitConfig) {
         var options = {};
         options.projectname = projectName;
         options.description = answers.repoDesc;
@@ -143,7 +144,7 @@ const main = async function(projectName, commanderOptions) {
     }
 }
 
-function precheck(commanderOptions) {
+function precheck(globalOptions) {
 
     if (shelljs == null || typeof shelljs === 'undefined') {
         shelljs.echo('Error importing shelljs');
@@ -167,18 +168,18 @@ function precheck(commanderOptions) {
         throw new Error('react-native-cli not found');
     }
     
-    if (!commanderOptions.noGit) {
+    if (!globalOptions.commandOptions.gitConfig) {
         if (!shelljs.which('git')) {
             shelljs.echo('Sorry, you must have git installed');
             throw new Error('git not found');
         }
     }
-    if (!commanderOptions.noSqliteConfig) {
-        if (!shelljs.which('sqlite')) {
-            shelljs.echo('Sorry, SQLite is not found');
-            throw new Error('SQLite not found');
-        }
-    }
+    // if (!commanderOptions.noSqliteConfig) {
+    //     if (!shelljs.which('sqlite')) {
+    //         shelljs.echo('Sorry, SQLite is not found');
+    //         throw new Error('SQLite not found');
+    //     }
+    // }
 
     // TODO: check for existence of user .ssh directory to know whether to allow git ssh
 
@@ -186,29 +187,29 @@ function precheck(commanderOptions) {
 
 }
 
-function buildQuestions(projectName, commanderOptions) {
+function buildQuestions(globalOptions) {
     const questions = [];
-    if (commanderOptions.lint) {
+    if (globalOptions.commandOptions.lint) {
         questions.push({type: 'confirm', name: 'configureEsLint', message:'Do you wish to install ESlint', default: true});
     }
 
-    if (commanderOptions.babel) {
+    if (globalOptions.commandOptions.babel) {
         questions.push({type: 'confirm', name: 'configureBabel', message: 'Do you wish to install Babel and the RN preset?', default: true});
     }
 
-    if (commanderOptions.license) {
+    if (globalOptions.commandOptions.license) {
         questions.push({type: 'confirm', name: 'configureLicense', message: 'Do you wish to configure a license?', default: true});
     }
-    if (commanderOptions.navigation) {
+    if (globalOptions.commandOptions.navigation) {
         questions.push({type: 'confirm', name: 'reactNavigation', message: 'Do you wish to install react-navigation', default: true});
     }
 
-    if (commanderOptions.redux) {
+    if (globalOptions.commandOptions.redux) {
         questions.push({type: 'confirm', name: 'redux', message: 'Do you wish to install react-redux?', default: true});
         questions.push({type: 'confirm', name: 'reduxThunk', message: 'Do you wish to install redux-thunk?', when: function(response) {return response.redux;}, default: true});
     }
     
-    if (commanderOptions.gitConfig) {
+    if (globalOptions.commandOptions.gitConfig) {
         const repoTypes = [
             {name: 'public'},
             {name: 'private'}
@@ -220,7 +221,7 @@ function buildQuestions(projectName, commanderOptions) {
             {name: 'https'}
         ];
 
-        questions.push({type: 'input', name: 'repoName', message: 'Repository name (' + projectName + '):', default: projectName});
+        questions.push({type: 'input', name: 'repoName', message: 'Repository name (' + projectName + '):', default: globalOptions.projectName});
         questions.push({type: 'list', name: 'repoType', message: 'Repository type: ', choices: repoTypes});
         questions.push({type: 'input', name: 'repoDesc', message: 'Github project description: '});
         questions.push({type: 'list', name: 'repoProtocol', message: 'Github protocol choice: ', choices: protocolTypes})
@@ -230,10 +231,6 @@ function buildQuestions(projectName, commanderOptions) {
         questions.push({type: 'password', name: 'password', message: 'Password: ', validate: function(input) {
             return input !== '';
         }});
-    }
-
-    if (!commanderOptions.noSqliteConfig) {
-
     }
 
     return questions;
