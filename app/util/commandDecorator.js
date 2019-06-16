@@ -7,7 +7,7 @@ const util = require('util');
 const wrappedFunction = async function(projectName, options, fn) {
 
     if (options.debug) {
-        shelljs.echo("commander options: " + util.inspect(commanderOptions));
+        shelljs.echo("commander options: " + util.inspect(options));
         return;
     }
 
@@ -34,6 +34,10 @@ const wrappedFunction = async function(projectName, options, fn) {
 
         if (options.lint) {
             globalOptions.commandOptions.lint = options.lint;
+        }
+
+        if (options.license) {
+            globalOptions.commandOptions.license = options.license;
         }
 
         if (options.babel) {
