@@ -54,6 +54,13 @@ const main = async function(projectName, commanderOptions) {
         }
     }
 
+    if (commanderOptions.license) {
+        if (answers.configureLicense) {
+            const license = require('../modules/licensing');
+            await license();
+        }
+    }
+
     if (commanderOptions.navigation) {
         if (answers.reactNavigation) {
             installReactNavigation();
@@ -71,7 +78,7 @@ const main = async function(projectName, commanderOptions) {
     }
 
     // TODO: allow non-MIT licenses
-    setLicense();
+    //setLicense();
     modifyRnssForIos();
     modifyRnssForAndroid(basePath, projectName);
 
@@ -189,6 +196,9 @@ function buildQuestions(projectName, commanderOptions) {
         questions.push({type: 'confirm', name: 'configureBabel', message: 'Do you wish to install Babel and the RN preset?', default: true});
     }
 
+    if (commanderOptions.license) {
+        questions.push({type: 'confirm', name: 'configureLicense', message: 'Do you wish to configure a license?', default: true});
+    }
     if (commanderOptions.navigation) {
         questions.push({type: 'confirm', name: 'reactNavigation', message: 'Do you wish to install react-navigation', default: true});
     }
@@ -276,9 +286,9 @@ function installReduxThunk() {
     shelljs.exec('yarn add redux-thunk --silent');
 }
 
-function setLicense() {
-    insertLine('./package.json').contentSync('  "license":"MIT",').at(5);
-}
+// function setLicense() {
+//     insertLine('./package.json').contentSync('  "license":"MIT",').at(5);
+// }
 
 function modifyRnssForIos(basePath) {
 
