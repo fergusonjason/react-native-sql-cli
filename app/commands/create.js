@@ -260,16 +260,6 @@ function installReactNativeSqliteStorage() {
 
 }
 
-function installBabelAndPresets() {
-
-    shelljs.echo("Installing babel-core");
-    shelljs.exec("yarn add @babel/core@* --dev --silent");
-
-    shelljs.echo("Installing metro-react-native-babel-preset");
-    shelljs.exec("yarn add metro-react-native-babel-preset --dev --silent");
-
-}
-
 function installReactNavigation() {
     shelljs.echo("Installing react-navigation");
     shelljs.exec("yarn add react-native-screens react-native-gesture-handler react-navigation --silent");
