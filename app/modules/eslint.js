@@ -74,7 +74,7 @@ function installEsLintAndStyles(type) {
     shelljs.echo('Attempting to install eslint for type ' + type);
 
     shelljs.exec('yarn add eslint-plugin-import --peer --silent');
-    shelljs.exec('yarn add eslint-plugin-jsx.ally --peer --silent');
+    shelljs.exec('yarn add eslint-plugin-jsx-ally --peer --silent');
     shelljs.exec('yarn add eslint-plugin-react --peer --silent');
 
     var installPackage;
@@ -100,7 +100,6 @@ function installEsLintAndStyles(type) {
         yarnUtils.installDevPackage(installPackage);
     }
 
-    // TODO: add eslint config to package.json or create .eslintrc
 }
 
 function configurePlugins(eslintJson) {
