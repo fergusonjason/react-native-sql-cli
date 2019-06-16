@@ -12,14 +12,20 @@ program.version(package.version, '-v, --version');
 
 program
     .command('create [projectname]')
-    .option('-G, --no-git-config')
-    .option('-S, --no-sqlite-config')
     .option('-L, --no-lint')
     .option('-B, --no-babel')
+    .option('--no-license')
     .option('-N, --no-navigation')
+    .option('-S, --no-sqlite-config')
     .option('-R, --no-redux')
+    .option('-G, --no-git-config')
     .option('--debug','show debug information and exit')
     .action(function(projectName, options) {
+        if (projectName == '' || projectName == null || typeof projectName === 'undefined') {
+            shelljs.echo('You must provide a project name!');
+            return;
+        }
+        
         const create = require('./app/commands/create');
         create(projectName, options);
     });
@@ -37,9 +43,15 @@ program
 program
     .command('archive [projectname]')
     .option('--debug', 'show debug information and exit')
-    .action(function(projectname, options) {
+    .action(function(projectName, options) {
+        if (projectName == '' || projectName == null || typeof projectName === 'undefined') {
+            shelljs.echo('You must provide a project name!');
+            return;
+        }
         const archive = require('./app/commands/archive');
-        archive(projectname, options);
+        const commandWrapper = require('./app/util/commandDecorator');
+        commandWrapper(projectName, options, archive);
+        //archive(projectname, options);
     });
 
 program.parse(process.argv);
