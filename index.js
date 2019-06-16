@@ -27,7 +27,9 @@ program
         }
         
         const create = require('./app/commands/create');
-        create(projectName, options);
+        const commandWrapper = require('./app/util/commandDecorator');
+        commandWrapper(projectName, options, create);
+        //create(projectName, options);
     });
 
 program
