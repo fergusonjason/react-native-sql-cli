@@ -3,6 +3,7 @@
 // React-Native SQLite CLI (second version)
 const commander = require('commander');
 const shelljs = require('shelljs');
+const commandWrapper = require('./app/util/commandDecorator');
 
 const package = require('./package.json');
 
@@ -27,7 +28,7 @@ program
         }
         
         const create = require('./app/commands/create');
-        const commandWrapper = require('./app/util/commandDecorator');
+        //const commandWrapper = require('./app/util/commandDecorator');
         commandWrapper(projectName, options, create);
         //create(projectName, options);
     });
@@ -37,9 +38,15 @@ program
     .option('--debug', 'show debug information and exit')
     .option('-G, --no-github-nuke')
     .option('-F, --no-file-nuke')
-    .action(function(projectname, options) {
+    .action(function(projectName, options) {
+        if (projectName == '' || projectName == null || typeof projectName === 'undefined') {
+            shelljs.echo('You must provide a project name!');
+            return;
+        }
         const nuke = require('./app/commands/nuke');
-        nuke(projectname, options);
+        //const commandWrapper = require('./app/util/commandDecorator');
+        commandWrapper(projectName, options, nuke);
+        //nuke(projectname, options);
     });
 
 program
@@ -51,7 +58,7 @@ program
             return;
         }
         const archive = require('./app/commands/archive');
-        const commandWrapper = require('./app/util/commandDecorator');
+        //const commandWrapper = require('./app/util/commandDecorator');
         commandWrapper(projectName, options, archive);
         //archive(projectname, options);
     });

@@ -2,69 +2,60 @@
 const shelljs = require('shelljs');
 const inquirer = require('inquirer');
 
-const main = async function(projectName, commanderOptions) {
+const main = async function(globalOptions) {
+//const main = async function(projectName, commanderOptions) {
 
-    if (commanderOptions.debug) {
-        const util = require('util');
-        shelljs.echo("commander options: " + util.inspect(commanderOptions));
-        return;
-    }
+    // if (commanderOptions.debug) {
+    //     const util = require('util');
+    //     shelljs.echo("commander options: " + util.inspect(commanderOptions));
+    //     return;
+    // }
 
-    if (!commanderOptions.projectName) {
-        shelljs.echo('You must provide a project name!');
-        return;
-    }
+    // const questions = [
+    //     {type: 'confirm', name: 'confirmNuke', message: 'Are you sure? '},
+    //     {type: 'input', name: 'username', message: 'Username: '}
+    // ];
 
-    const questions = [
-        {type: 'confirm', name: 'confirmNuke', message: 'Are you sure? '},
-        {type: 'input', name: 'username', message: 'Username: '}
-    ];
-
-    shelljs.echo("You will NOT be able to undo this. If you meant to backup, run rnsc archive first");
-    var answers = await inquirer.prompt(questions);
+    shelljs.echo('You will NOT be able to undo this. If you meant to backup, run rnsc archive first');
+    var answers = await inquirer.prompt(buildQuestions(globalOptions));
 
     if (answers.confirmNuke) {
 
-        if (commanderOptions.githubNuke) {
-            shelljs.echo('Deleting GitHub repository ' + projectName);
+        if (globalOptions.commandOptions.githubNuke) {
+            shelljs.echo('Deleting GitHub repository ' + globalOptions.projectName);
 
             try {
                 const GitHub = require('github-api');
                 const gh = new GitHub({username: answers.username, password: answers.password});
-                const remoteRepo = gh.getRepo(answers.username, projectName);
+                const remoteRepo = gh.getRepo(answers.username, globalOptions.projectName);
                 await remoteRepo.deleteRepo();
             } catch (err) {
-                shelljs.echo("Unable to delete repo: " + err.message);
+                shelljs.echo('Unable to delete repo: ' + err.message);
             }
         }
 
     
-        if (commanderOptions.fileNuke) {
+        if (globalOptions.commandOptions.fileNuke) {
          
             shelljs.echo('Deleting project directory');
             
             const currentPath = shelljs.pwd();
-            if (currentPath.endsWith(projectName)) {
+            if (currentPath.endsWith(globalOptions.projectName)) {
                 shelljs.cd('..');
             }
             
-            shelljs.exec('rm -rf ' + projectName); 
+            shelljs.exec('rm -rf ' + globalOptions.projectName); 
         }
-    }
-
-
-    if (commanderOptions.fileNuke) {
-
     }
 
 }
 
-function buildQuestions(commanderOptions) {
+function buildQuestions(globalOptions) {
 
     var questions = [];
     questions.push({type: 'confirm', name: 'confirmNuke', message: 'Are you sure? '});
     
-    if (commanderOptions.githubNuke) {
+    if (globalOptions.commandOptions.githubNuke) {
         questions.push({type: 'input', name: 'username', message: 'Username: '});
         questions.push({type: 'password', name: 'password', message: 'Password: '});
     }
@@ -74,7 +65,7 @@ function buildQuestions(commanderOptions) {
 
 function authenticate(username, password) {
 
-    const GitHub = require("github-api");
+    const GitHub = require('github-api');
 
     // create unauthenticated client
     const auth = new GitHub(
