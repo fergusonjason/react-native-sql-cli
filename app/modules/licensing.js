@@ -14,17 +14,17 @@ const questions = [
     {type: 'list', name: 'licenseType', message: 'License type: ', choices: licenseTypes}
 ]
 
-const license = async function() {
+const license = async function(globalOptions) {
 
     var answers = await inquirer.prompt(questions);
 
     if (answers.choice !== 'None') {
-        setLicense(answers.licenseType);
-        writeLicense(answers);
+        setLicenseInPackageJson(answers.licenseType);
+        await writeLicense(answers, globalOptions);
     }
 }
 
-function setLicense(licenseType) {
+function setLicenseInPackageJson(licenseType) {
 
     shelljs.echo('Setting license type:' + licenseType);
     var packageJson = jsonfile.readFileSync('package.json');
@@ -32,9 +32,17 @@ function setLicense(licenseType) {
     jsonfile.writeFileSync('package.json', packageJson);
 }
 
-async function writeLicense(answers) {
+async function writeLicense(answers, globalOptions) {
+
+    var path = require('path');
+    var appDir = path.dirname(require.main.filename);
 
     const fs = require('fs');
+
+    if (shelljs.pwd() !== globalOptions.projectDirectory) {
+        shelljs.cd(globalOptions.projectDirectory);
+    }
+
     var translatedFilename = "";
     switch(answers.licenseType) {
         case "MIT":
@@ -45,13 +53,22 @@ async function writeLicense(answers) {
         case "Apache 2.0":
             translatedFilename = 'apache2.txt';
     }
-    var fileContents = fs.readFileSync('../../templates/license/' + translatedFilename);
 
-    const year = new Date().getFullYear() + '';
-    fileContents = fileContents.replace(/<YEAR>/g, year);
-    fileContents = fileContents.replace(/<COPYRIGHT HOLDER>/g, answers.copyrightHolder);
+    var fileContents;
+    try {
+        fileContents = fs.readFileSync(appDir + '/templates/license/' + translatedFilename, 'utf8');
+        const year = new Date().getFullYear() + '';
+        fileContents = fileContents.replace(/<YEAR>/g, year);
+        fileContents = fileContents.replace(/<COPYRIGHT HOLDER>/g, answers.copyrightHolder);
+    } catch (err) {
+        shelljs.echo('Unable to read file for license: ' + translatedFilename);
+    }
 
-    fs.writeFileSync('LICENSE', fileContents);
+    try {
+        fs.writeFileSync('LICENSE', fileContents);
+    } catch (err) {
+        shelljs.echo('Unable to write file for license: ' + translatedFilename);
+    }
 }
 
 module.exports = license;
