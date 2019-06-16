@@ -58,7 +58,7 @@ const main = async function(globalOptions) {
     if (globalOptions.commandOptions.license) {
         if (answers.configureLicense) {
             const license = require('../modules/licensing');
-            await license();
+            await license(globalOptions);
         }
     }
 
@@ -81,11 +81,11 @@ const main = async function(globalOptions) {
     // TODO: allow non-MIT licenses
     //setLicense();
     modifyRnssForIos();
-    modifyRnssForAndroid(globalOptions.projectPath, globalOptions.projectName);
+    modifyRnssForAndroid(globalOptions);
 
-    createAppDir();
+    createAppDir(globalOptions);
 
-    if (globalOptions.configOptions.gitConfig) {
+    if (globalOptions.commandOptions.gitConfig) {
         var options = {};
         options.projectname = projectName;
         options.description = answers.repoDesc;
@@ -99,10 +99,7 @@ const main = async function(globalOptions) {
         var repo;
         try {
             repo = await user.createRepo({name:answers.repoName, description: answers.repoDesc, private: answers.repoType});
-            if (commanderOptions.showCommanderOptions) {
-                const util = require('util');
-                shelljs.echo('commander options: ' + util.inspect(repo));
-            }
+
         } catch (err) {
             shelljs.echo('Unable to create repository (check if repository already exists): ' + err.message);
         }
@@ -190,7 +187,7 @@ function precheck(globalOptions) {
 function buildQuestions(globalOptions) {
     const questions = [];
     if (globalOptions.commandOptions.lint) {
-        questions.push({type: 'confirm', name: 'configureEsLint', message:'Do you wish to install ESlint', default: true});
+        questions.push({type: 'confirm', name: 'configureEsLint', message:'Do you wish to install ESlint? ', default: true});
     }
 
     if (globalOptions.commandOptions.babel) {
@@ -201,12 +198,12 @@ function buildQuestions(globalOptions) {
         questions.push({type: 'confirm', name: 'configureLicense', message: 'Do you wish to configure a license?', default: true});
     }
     if (globalOptions.commandOptions.navigation) {
-        questions.push({type: 'confirm', name: 'reactNavigation', message: 'Do you wish to install react-navigation', default: true});
+        questions.push({type: 'confirm', name: 'reactNavigation', message: 'Do you wish to install react-navigation? ', default: true});
     }
 
     if (globalOptions.commandOptions.redux) {
-        questions.push({type: 'confirm', name: 'redux', message: 'Do you wish to install react-redux?', default: true});
-        questions.push({type: 'confirm', name: 'reduxThunk', message: 'Do you wish to install redux-thunk?', when: function(response) {return response.redux;}, default: true});
+        questions.push({type: 'confirm', name: 'redux', message: 'Do you wish to install react-redux? ', default: true});
+        questions.push({type: 'confirm', name: 'reduxThunk', message: 'Do you wish to install redux-thunk? ', when: function(response) {return response.redux;}, default: true});
     }
     
     if (globalOptions.commandOptions.gitConfig) {
@@ -291,30 +288,40 @@ function modifyRnssForIos(basePath) {
 
 }
 
-function modifyRnssForAndroid(basePath, projectname) {
+function modifyRnssForAndroid(globalOptions) {
 
-    if (shelljs.test('-e', basePath + '/android')) {
-        shelljs.echo('Unable to find project android directory. Current path: ' + shelljs.pwd());
-        return;
+    if (shelljs.pwd() !== globalOptions.projectDirectory) {
+        shelljs.cd(globalOptions.projectDirectory);
     }
 
-    shelljs.echo('changing directory to ' + basePath + '/android');
-    shelljs.cd(basePath + '/android');
+    const androidDir = globalOptions.projectDirectory + '/android';
+    const iosDir = globalOptions.projectDirectory + '/ios';
+
+    if (shelljs.pwd() !== globalOptions.projectDirectory) {
+        shelljs.cd(globalOptions.projectDirectory);
+    }
+
+    shelljs.echo('changing directory to ' +  androidDir);
+    shelljs.cd(androidDir);
 
     shelljs.echo('Modifying settings.gradle');
-    insertLine('./settings.gradle').appendSync('include ":react-native-sqlite-storage"');
-    insertLine('./settings.gradle').appendSync("project(':react-native-sqlite-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlite-storage/src/android')");
+    insertLine(androidDir + '/settings.gradle').appendSync('include ":react-native-sqlite-storage"');
+    insertLine(androidDir + '/settings.gradle').appendSync("project(':react-native-sqlite-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlite-storage/src/android')");
     
-    shelljs.cd('app');
     shelljs.echo('Modifying build.gradle');
-    insertLine('./build.gradle').contentSync("    implementation project(':react-native-sqlite-storage')").at(144);
+    insertLine(androidDir + '/app/build.gradle').contentSync("    implementation project(':react-native-sqlite-storage')").at(144);
 
-    shelljs.cd('src/main/java/com/' + projectname + '/');
+    const sourceDir = androidDir + '/app/src/main/java/com/' + globalOptions.projectName + '/';
     shelljs.echo('Modifying MainApplication.java');
-    insertLine('./MainApplication.java').contentSync('            new SQLitePluginPackage(),   // register SQLite Plugin here').at(25);
+    insertLine(sourceDir + '/MainApplication.java').contentSync('            new SQLitePluginPackage(),   // register SQLite Plugin here').at(25);
 }    
 
-function createAppDir() {
+function createAppDir(globalOptions) {
+
+    if (shelljs.pwd() !== globalOptions.projectDirectory) {
+        shelljs.cd(globalOptions.projectDirectory);
+    }
+
     shelljs.mkdir('app');
     shelljs.cd('app');
     shelljs.exec('echo // file template >> index.js');
