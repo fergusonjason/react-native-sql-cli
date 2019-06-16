@@ -1,30 +1,31 @@
 const shelljs = require('shelljs');
 const inquirer = require('inquirer');
 
-const questions = [
-    {type: 'input', name: 'archivename', }
-];
-const main = async function(projectname, commanderOptions) {
+// const questions = [
+//     {type: 'input', name: 'archivename', }
+// ];
+const main = async function(globalOptions) {
+//const main = async function(projectname, commanderOptions) {
 
-    if (commanderOptions.debug) {
-        const util = require('util');
-        shelljs.echo("commander options: " + util.inspect(commanderOptions));
-        return;
-    }
+    // if (commanderOptions.debug) {
+    //     const util = require('util');
+    //     shelljs.echo("commander options: " + util.inspect(commanderOptions));
+    //     return;
+    // }
 
-    if (!commanderOptions.projectname) {
-        shelljs.echo('You must provide a project name');
-        return;
-    }
+    // if (!globalOptions.projectName) {
+    //     shelljs.echo('You must provide a project name!');
+    //     return;
+    // }
 
-    if (!shelljs.test('-d', projectname)) {
+    if (!shelljs.test('-d', globalOptions.projectName)) {
         shelljs.echo('You must be in the parent directory of your project (i.e. /home/yourname/myprojects) to archive.');
         return;
     }
 
-    shelljs.echo(__dirname);
+    // shelljs.echo(__dirname);
 
-    const answers = await inquirer.prompt(buildQuestions(projectname));
+    const answers = await inquirer.prompt(buildQuestions(globalOptions.projectName));
 
     const fs = require('fs');
     const archiver = require('archiver');
@@ -46,6 +47,7 @@ const main = async function(projectname, commanderOptions) {
 
     archive.on('warning', function(err) {
         if (err.code === 'ENOENT') {
+            shelljs.echo("WARNING: received error code ENOENT");
             // log warning
           } else {
             // throw error
@@ -59,7 +61,8 @@ const main = async function(projectname, commanderOptions) {
 
     archive.pipe(output);
 
-    shelljs.cd(projectname);
+    shelljs.cd(globalOptions.projectName);
+    globalOptions.currentDirectory = shelljs.pwd();
 
     shelljs.echo('Adding android directory');
     archive.directory('android/',true);
@@ -88,13 +91,24 @@ const main = async function(projectname, commanderOptions) {
 
     if (shelljs.test('-f','./.gitignore')) {
         shelljs.echo('Adding .gitignore');
-        archive.append(getStream('./.gitignore'), {name: '.gitignore'});
+        try {
+            archive.append(getStream('./.gitignore'), {name: '.gitignore'});
+        } catch (err) {
+            shelljs.echo('Unable to add .gitignore to archive: ' + err.message);
+        }
     }
 
     if (shelljs.test('-f','./LICENSE')) {
         shelljs.echo('Adding license');
-        archive.append(fs.createReadStream('./LICENSE'), {name: 'LICENSE'});
+        try {
+            archive.append(getStream('./LICENSE'), {name: 'LICENSE'});
+        } catch (err) {
+            shelljs.echo('Unable to add license: ' + err.message);
+        }
     }
+
+    archive.finalize();
+    //output.close();
 
     output.on('close', function() {
         shelljs.echo('Completed writing archive (' + archive.pointer() + ')');
