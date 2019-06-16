@@ -93,10 +93,10 @@ const main = async function(projectName, commanderOptions) {
             repo = await user.createRepo({name:answers.repoName, description: answers.repoDesc, private: answers.repoType});
             if (commanderOptions.showCommanderOptions) {
                 const util = require('util');
-                shelljs.echo("commander options: " + util.inspect(repo));
+                shelljs.echo('commander options: ' + util.inspect(repo));
             }
         } catch (err) {
-            shelljs.echo("Unable to create repository (check if repository already exists): " + err.message);
+            shelljs.echo('Unable to create repository (check if repository already exists): ' + err.message);
         }
 
         if (!shelljs.pwd() === basePath) {
@@ -138,44 +138,44 @@ const main = async function(projectName, commanderOptions) {
 
 function precheck(commanderOptions) {
 
-    if (shelljs == null || typeof shelljs === "undefined") {
-        shelljs.echo("Error importing shelljs");
-        throw new Error("Error importing shelljs");
+    if (shelljs == null || typeof shelljs === 'undefined') {
+        shelljs.echo('Error importing shelljs');
+        throw new Error('Error importing shelljs');
     } 
 
-    if (inquirer == null || typeof inquirer === "undefined") {
-        shelljs.echo("Error importing inquirer");
-        throw new Error("Error importing inquirer");
+    if (inquirer == null || typeof inquirer === 'undefined') {
+        shelljs.echo('Error importing inquirer');
+        throw new Error('Error importing inquirer');
 
     }
 
-    if (!shelljs.which("yarn")) {
-        shelljs.echo("Sorry, you must have yarn installed");
-        throw new Error("Yarn not found");
+    if (!shelljs.which('yarn')) {
+        shelljs.echo('Sorry, you must have yarn installed');
+        throw new Error('Yarn not found');
     }
 
     
-    if (!shelljs.which("react-native")) {
-        shelljs.echo("react-native-cli is not installed");
-        throw new Error("react-native-cli not found");
+    if (!shelljs.which('react-native')) {
+        shelljs.echo('react-native-cli is not installed');
+        throw new Error('react-native-cli not found');
     }
     
     if (!commanderOptions.noGit) {
-        if (!shelljs.which("git")) {
-            shelljs.echo("Sorry, you must have git installed");
-            throw new Error("git not found");
+        if (!shelljs.which('git')) {
+            shelljs.echo('Sorry, you must have git installed');
+            throw new Error('git not found');
         }
     }
     if (!commanderOptions.noSqliteConfig) {
-        if (!shelljs.which("sqlite")) {
-            shelljs.echo("Sorry, SQLite is not found");
-            throw new Error("SQLite not found");
+        if (!shelljs.which('sqlite')) {
+            shelljs.echo('Sorry, SQLite is not found');
+            throw new Error('SQLite not found');
         }
     }
 
     // TODO: check for existence of user .ssh directory to know whether to allow git ssh
 
-    shelljs.echo("Precheck complete");
+    shelljs.echo('Precheck complete');
 
 }
 
@@ -200,14 +200,14 @@ function buildQuestions(projectName, commanderOptions) {
     
     if (commanderOptions.gitConfig) {
         const repoTypes = [
-            {name: "public"},
+            {name: 'public'},
             {name: 'private'}
         ];
 
         const protocolTypes = [
-            {name: "git"},
+            {name: 'git'},
             {name: 'git (SSH)'},
-            {name: "https"}
+            {name: 'https'}
         ];
 
         questions.push({type: 'input', name: 'repoName', message: 'Repository name (' + projectName + '):', default: projectName});
@@ -231,7 +231,7 @@ function buildQuestions(projectName, commanderOptions) {
 
 function authenticate(username, password) {
 
-    const GitHub = require("github-api");
+    const GitHub = require('github-api');
 
     // create unauthenticated client
     const auth = new GitHub(
@@ -248,36 +248,36 @@ function authenticate(username, password) {
 }
 
 function createReactNativeProject(projectDir) {
-    shelljs.echo("Initializing react-native project " + projectDir + " (this may take a bit).");
-    shelljs.exec("react-native init " + projectDir + " > /dev/null 2>&1");
+    shelljs.echo('Initializing react-native project ' + projectDir + ' (this may take a bit).');
+    shelljs.exec('react-native init ' + projectDir + ' > /dev/null 2>&1');
     shelljs.cd(projectDir);
-    shelljs.echo("Project intialized");
+    shelljs.echo('Project intialized');
 }
 
 function installReactNativeSqliteStorage() {
-    shelljs.echo("Installing react-native-sqlite-storage");
-    shelljs.exec("yarn add react-native-sqlite-storage --silent");
-    shelljs.echo("Installed react-native-sql-storage");
+    shelljs.echo('Installing react-native-sqlite-storage');
+    shelljs.exec('yarn add react-native-sqlite-storage --silent');
+    shelljs.echo('Installed react-native-sql-storage');
 
 }
 
 function installReactNavigation() {
-    shelljs.echo("Installing react-navigation");
-    shelljs.exec("yarn add react-native-screens react-native-gesture-handler react-navigation --silent");
+    shelljs.echo('Installing react-navigation');
+    shelljs.exec('yarn add react-native-screens react-native-gesture-handler react-navigation --silent');
 }
 
 function installRedux() {
-    shelljs.echo("Installing react-redux");
-    shelljs.exec("yarn add redux react-redux --silent");
+    shelljs.echo('Installing react-redux');
+    shelljs.exec('yarn add redux react-redux --silent');
 }
 
 function installReduxThunk() {
-    shelljs.echo("Installing redux-thunk");
-    shelljs.exec("yarn add redux-thunk --silent");
+    shelljs.echo('Installing redux-thunk');
+    shelljs.exec('yarn add redux-thunk --silent');
 }
 
 function setLicense() {
-    insertLine("./package.json").contentSync("  \"license\":\"MIT\",").at(5);
+    insertLine('./package.json').contentSync('  "license":"MIT",').at(5);
 }
 
 function modifyRnssForIos(basePath) {
@@ -287,24 +287,24 @@ function modifyRnssForIos(basePath) {
 function modifyRnssForAndroid(basePath, projectname) {
 
     if (shelljs.test('-e', basePath + '/android')) {
-        shelljs.echo("Unable to find project android directory. Current path: " + shelljs.pwd());
+        shelljs.echo('Unable to find project android directory. Current path: ' + shelljs.pwd());
         return;
     }
 
-    shelljs.echo("changing directory to " + basePath + "/android");
-    shelljs.cd(basePath + "/android");
+    shelljs.echo('changing directory to ' + basePath + '/android');
+    shelljs.cd(basePath + '/android');
 
-    shelljs.echo("Modifying settings.gradle");
-    insertLine("./settings.gradle").appendSync("include ':react-native-sqlite-storage'");
-    insertLine("./settings.gradle").appendSync("project(':react-native-sqlite-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlite-storage/src/android')");
+    shelljs.echo('Modifying settings.gradle');
+    insertLine('./settings.gradle').appendSync('include ":react-native-sqlite-storage"');
+    insertLine('./settings.gradle').appendSync("project(':react-native-sqlite-storage').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sqlite-storage/src/android')");
     
-    shelljs.cd("app");
-    shelljs.echo("Modifying build.gradle");
-    insertLine("./build.gradle").contentSync("    implementation project(':react-native-sqlite-storage')").at(144);
+    shelljs.cd('app');
+    shelljs.echo('Modifying build.gradle');
+    insertLine('./build.gradle').contentSync("    implementation project(':react-native-sqlite-storage')").at(144);
 
-    shelljs.cd("src/main/java/com/" + projectname + "/");
-    shelljs.echo("Modifying MainApplication.java");
-    insertLine("./MainApplication.java").contentSync("            new SQLitePluginPackage(),   // register SQLite Plugin here").at(25);
+    shelljs.cd('src/main/java/com/' + projectname + '/');
+    shelljs.echo('Modifying MainApplication.java');
+    insertLine('./MainApplication.java').contentSync('            new SQLitePluginPackage(),   // register SQLite Plugin here').at(25);
 }    
 
 function createAppDir() {
