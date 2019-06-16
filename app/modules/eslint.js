@@ -45,11 +45,11 @@ const configureEslint = async function(parentAnswers) {
     shelljs.echo('Configuring ECMAScript to ' + answers.eslintEcmaVersion);
     configureEcmaVersion(eslintJson, answers.eslintEcmaVersion);
     
-    shelljs.echo("Configuring react and react-native eslint plugins");
+    shelljs.echo('Configuring react and react-native eslint plugins');
     configurePlugins(eslintJson);
 
     if (parentAnswers.configureBabel) {
-        shelljs.echo("Configuring eslint to use babel parser");
+        shelljs.echo('Configuring eslint to use babel parser');
         configureParser(eslintJson);
     }
 
@@ -66,12 +66,17 @@ function installEsLintAndStyles(type) {
 
     yarnUtils.installDevPackage('eslint');
 
-    if (type === "none") {
-        shelljs.echo("Not installing eslint type");
+    if (type === 'none') {
+        shelljs.echo('Not installing eslint type');
         return;
     }
 
     shelljs.echo('Attempting to install eslint for type ' + type);
+
+    shelljs.exec('yarn add eslint-plugin-import --peer --silent');
+    shelljs.exec('yarn add eslint-plugin-jsx.ally --peer --silent');
+    shelljs.exec('yarn add eslint-plugin-react --peer --silent');
+
     var installPackage;
     switch (type) {
         case 'eslint-recommended':
@@ -99,7 +104,7 @@ function installEsLintAndStyles(type) {
 }
 
 function configurePlugins(eslintJson) {
-    eslintJson.plugins = ["react","react-native"];
+    eslintJson.plugins = ['react','react-native'];
 }
 
 function configureEcmaVersion(eslintJson, ecmaVersion) {
