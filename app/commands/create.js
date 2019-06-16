@@ -49,7 +49,8 @@ const main = async function(projectName, commanderOptions) {
 
     if (commanderOptions.babel) {
         if (answers.configureBabel) {
-            installBabelAndPresets();
+            const babel = require('../modules/babel');
+            babel();
         }
     }
 
