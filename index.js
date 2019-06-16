@@ -20,7 +20,7 @@ program
     .option('-R, --no-redux')
     .option('--debug','show debug information and exit')
     .action(function(projectName, options) {
-        const create = require('./lib/create');
+        const create = require('./app/commands/create');
         create(projectName, options);
     });
 
@@ -30,7 +30,7 @@ program
     .option('-G, --no-github-nuke')
     .option('-F, --no-file-nuke')
     .action(function(projectname, options) {
-        const nuke = require('./lib/nuke');
+        const nuke = require('./app/commands/nuke');
         nuke(projectname, options);
     });
 
@@ -38,7 +38,7 @@ program
     .command('archive [projectname]')
     .option('--debug', 'show debug information and exit')
     .action(function(projectname, options) {
-        const archive = require('./lib/archive');
+        const archive = require('./app/commands/archive');
         archive(projectname, options);
     });
 
