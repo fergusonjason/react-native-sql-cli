@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const shelljs = require('shelljs');
+const yarnUtils = require('./yarn');
 
 const lintTypes = [
     {name: 'none'},
@@ -36,6 +37,11 @@ const configureEslint = async function(parentAnswers) {
     eslintJson.parserOptions.ecmaFeatures = {};
     eslintJson.extends = [];
     
+    if (answers.esLintType !== 'none') {
+        shelljs.echo('Installing Eslint preset: ' + answers.esLintType);
+        installEsLintAndStyles(answers.esLintType);
+    }
+
     shelljs.echo('Configuring ECMAScript to ' + answers.eslintEcmaVersion);
     configureEcmaVersion(eslintJson, answers.eslintEcmaVersion);
     
@@ -54,6 +60,42 @@ const configureEslint = async function(parentAnswers) {
     configureJsx(eslintJson);
 
     writeEslint(eslintJson);
+}
+
+function installEsLintAndStyles(type) {
+
+    yarnUtils.installDevPackage('eslint');
+
+    if (type === "none") {
+        shelljs.echo("Not installing eslint type");
+        return;
+    }
+
+    shelljs.echo('Attempting to install eslint for type ' + type);
+    var installPackage;
+    switch (type) {
+        case 'eslint-recommended':
+            installPackage = 'eslint-config-recommended';
+            break;
+        case 'react/react-native':
+            installPackage = ['eslint-plugin-react','eslint-plugin-react-native'];
+            break;
+        case 'standard':
+            installPackage = 'eslint-config-standard';
+            break;
+        case 'google':
+            installPackage = 'eslint-config-google';
+            break;
+        case 'airbnb':
+            installPackage = 'eslint-config-airbnb';
+            break;
+    }
+
+    if (installPackage) {
+        yarnUtils.installDevPackage(installPackage);
+    }
+
+    // TODO: add eslint config to package.json or create .eslintrc
 }
 
 function configurePlugins(eslintJson) {
