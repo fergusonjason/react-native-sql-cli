@@ -19,9 +19,8 @@ const ecmaVersions = [
 ];
 
 const eslintQuestions = [
-    {type: 'list', name: 'eslintEcmaVersion', message: 'Which ECMAScript version do you wish to support: ', choices: ecmaVersions},
-    {type: 'list', name: 'esLintType', message: 'Which lint style do you want?', when: function(response) {return response.esLint;}, choices: lintTypes}
-
+    {type: 'list', name: 'eslintEcmaVersion', message: 'ECMAScript version: ', choices: ecmaVersions},
+    {type: 'list', name: 'esLintType', message: 'Lint style: ', choices: lintTypes}
 ];
 
 // has to return the JSON object, even if we've already written the file
@@ -85,6 +84,7 @@ function configureEcmaVersion(eslintJson, ecmaVersion) {
 }
 
 function configureExtends(eslintJson, eslintStyle) {
+    shelljs.echo('Configuring eslint style: ' + eslintStyle);
     eslintJson.extends.push(eslintStyle);
 }
 
